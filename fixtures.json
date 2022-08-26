@@ -1,0 +1,31 @@
+{
+  "inventory": {
+    "slimspot": {
+      "description": "4ch DMX, note the dXXX number...",
+      "1": "red",
+      "2": "green",
+      "3": "blue",
+      "4": "lightness? or whiteness?"
+    },
+    "cheapspot": {
+      "description": "5ch DMX?, set the AXXX number...",
+      "1": "brightness",
+      "2": "red",
+      "3": "green",
+      "4": "blue",
+      "5": "lightness? or whiteness?"
+    }
+  },
+  "universe": {
+    "274": [0, 255],
+    "275": [0, 0],
+    "276": [0, 0],
+    "277": [0, 255],
+    "278": [0, 0],
+
+    "389": [100, 0],
+    "390": [0, 200],
+    "391": [0, 0],
+    "392": [0, 0]
+  }
+}

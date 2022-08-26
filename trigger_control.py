@@ -17,16 +17,22 @@ class Trigger:
         print("starting trigger listen")
 
         while True:
-            if self.ard.in_waiting > 0:
-                line = self.ard.readline().decode('utf-8').rstrip()
-                print(line)
-                if line == "ACTIVATED":
-                    if not active:
-                        active = True
-                        self.lights.light_fade(True)
-                        time.sleep(1)
-                if line == "DEACTIVATED":
-                    if active:
-                        active = False
-                        self.lights.light_fade(False)
-                        time.sleep(1)
+            self.lights.light_fade(True)
+            time.sleep(3)
+            self.lights.light_fade(False)
+            time.sleep(3)
+            
+
+            # if self.ard.in_waiting > 0:
+            #     line = self.ard.readline().decode('utf-8').rstrip()
+            #     print(line)
+            #     if line == "ACTIVATED":
+            #         if not active:
+            #             active = True
+            #             self.lights.light_fade(True)
+            #             time.sleep(1)
+            #     if line == "DEACTIVATED":
+            #         if active:
+            #             active = False
+            #             self.lights.light_fade(False)
+            #             time.sleep(1)
