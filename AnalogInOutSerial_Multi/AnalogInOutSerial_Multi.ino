@@ -58,10 +58,10 @@ void loop() {
 
 void read_sensor(int analogInPin, int activated_array_num) {
     sensorValue = analogRead(analogInPin);
-//    Serial.print("sensorValue ");
-//    Serial.print(activated_array_num);
-//    Serial.print(":");
-//    Serial.println(sensorValue);
+    Serial.print("sensorValue ");
+    Serial.print(activated_array_num);
+    Serial.print(":");
+    Serial.println(sensorValue);
     
     if (sensorValue > threshold) {
       if (activated_array[activated_array_num] == 0) { // the 0 and 1 will gate the trigger so it only sends its activation/deactivation once
