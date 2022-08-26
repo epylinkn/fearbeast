@@ -1,4 +1,21 @@
 # fearbeast
-Raspberry Pi Python Project for controlling lights and sounds for the Facing the Fearbeast project
 
-# fearbeast
+- Raspberry Pi python app controls DMX lighting
+- TODO: Teensy monitors pressure mats and controls sound
+
+# Develop
+
+```
+sudo -E python3 init.py
+```
+
+# Deploy
+
+```
+./sync.sh
+```
+
+# Authors
+
+- Jerome
+- LEAFCRUNCHER (@epylinkn)
