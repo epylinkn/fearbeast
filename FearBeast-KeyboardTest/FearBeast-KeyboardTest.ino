@@ -19,7 +19,7 @@ void loop() {
   // Your computer will receive these characters from a USB keyboard.
 
   if (!pressed && digitalRead(35) == LOW) {
-    Keyboard.print("schmeckel"); 
+    Keyboard.print("ancienttrain045");
     pressed = true;
   }
 

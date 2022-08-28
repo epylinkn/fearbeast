@@ -93,13 +93,13 @@ void loop() {
   // Keep the audio looping...
   if (isFearing && playSdWav1.isPlaying() == false) {
     Serial.println("Re-start Fearing");
-    playSdWav1.play("SCP.wav");
+    playSdWav1.play("the-frontier.wav");
     delay(10); // wait for library to parse WAV info
   }
   
   if (!isFearing && playSdWav2.isPlaying() == false) {
     Serial.println("Re-start Parting");
-    playSdWav2.play("TheParting.wav");
+    playSdWav2.play("always-like-this.wav");
     delay(10); // wait for library to parse WAV info
   }
 }

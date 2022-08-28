@@ -1,4 +1,4 @@
- const int numReadings = 10;
+const int numReadings = 10;
 const int threshold = 1000;   // the threshold level that's will activate the trigger
 const int thresholdLow = 800;   // an threshold level that will deactivate the trigger 
 const int ledPin = 13;       // pin that the LED is attached to
@@ -24,37 +24,42 @@ void setup() {
 }
 
 void loop() {
-  activated_sum = 0;
-  read_sensor(analogInPin_0, 0);
-  read_sensor(analogInPin_1, 1);
-  read_sensor(analogInPin_2, 2);
-  read_sensor(analogInPin_3, 3);
-  read_sensor(analogInPin_4, 4);
-  read_sensor(analogInPin_5, 5);
-
-  int i;
-  for (i=0; i< 6; i++) {
-      activated_sum += activated_array[i];
-  }
-
-  if (activated_sum > 0) { // the 0 and 1 will gate the trigger so it only sends its activation/deactivation once
-    if (activated == 0) {
-      digitalWrite(ledPin, HIGH);
-      Serial.println("ACTIVATED"); // this string will trigger the raspberry pi
-      activated = 1;
-      }
-    }
-
-  else {
-    if (activated == 1) { // the 0 and 1 will gate the trigger so it only sends its activation/deactivation once
-      digitalWrite(ledPin, LOW);
-      Serial.println("DEACTIVATED"); // this string will trigger the raspberry pi
-      activated = 0;
-    }
-  }
-
-  delay(100);
-  }
+    Serial.println("DEACTIVATED"); // this string will trigger the raspberry pi
+    delay(10000);
+    Serial.println("ACTIVATED"); // this string will trigger the raspberry pi
+    delay(10000);
+  
+//  activated_sum = 0;
+//  read_sensor(analogInPin_0, 0);
+//  read_sensor(analogInPin_1, 1);
+//  read_sensor(analogInPin_2, 2);
+//  read_sensor(analogInPin_3, 3);
+//  read_sensor(analogInPin_4, 4);
+//  read_sensor(analogInPin_5, 5);
+//
+//  int i;
+//  for (i=0; i< 6; i++) {
+//      activated_sum += activated_array[i];
+//  }
+//
+//  if (activated_sum > 0) { // the 0 and 1 will gate the trigger so it only sends its activation/deactivation once
+//    if (activated == 0) {
+//      digitalWrite(ledPin, HIGH);
+//      Serial.println("ACTIVATED"); // this string will trigger the raspberry pi
+//      activated = 1;
+//      }
+//    }
+//
+//  else {
+//    if (activated == 1) { // the 0 and 1 will gate the trigger so it only sends its activation/deactivation once
+//      digitalWrite(ledPin, LOW);
+//      Serial.println("DEACTIVATED"); // this string will trigger the raspberry pi
+//      activated = 0;
+//    }
+//  }
+//
+//  delay(100);
+}
 
 void read_sensor(int analogInPin, int activated_array_num) {
     sensorValue = analogRead(analogInPin);
