@@ -55,7 +55,7 @@ ARTSTATES currentState = BEASTING;
 bool nextState = false;
 unsigned long nextStateAt = 0;
 
-const int matPins[8] = { A0, A1, A2, A3, A14, A15, A16, A17 };
+const int matPins[8] = { A10, A11, A12, A13, A14, A15, A16, A17 };
 int matReadings[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int matThreshold = 300;
 int stripPin = 37;
@@ -79,8 +79,8 @@ void setup() {
     }
   }
   
-  mixer1.gain(0, 0.5);
-  mixer1.gain(1, 0.5);
+  mixer1.gain(0, 0.2);
+  mixer1.gain(1, 0.2);
   
   delay(1000);
 
@@ -93,19 +93,19 @@ void loop() {
   unsigned long currentTime = millis();
 
   //= Read Pressure Mats
-//  bool pressed = false;
-//  for (int i = 0; i < 8; i++) {
-//    int reading = analogRead(matPins[i]);
-//    if (reading > matThreshold) {
-//      pressed = true;
-//    }
+  bool pressed = false;
+  for (int i = 0; i < 8; i++) {
+    int reading = analogRead(matPins[i]);
+    if (reading > matThreshold) {
+      pressed = true;
+    }
 //    Serial.print(reading);
 //    Serial.print("\t");
-//  }
+  }
 //  Serial.println();
     
-//  if (currentState == BEASTING && pressed) {
-  if (currentState == BEASTING && autoplayAt < millis()) {
+  if (currentState == BEASTING && pressed) {
+//  if (currentState == BEASTING && autoplayAt < millis()) {
     currentState = TO_CHILD;
     Serial.println("TO_CHILD");
     arduino.println("TO_CHILD");
@@ -113,11 +113,11 @@ void loop() {
     nextStateAt = currentTime + transitionMs;
     fade1.fadeOut(transitionMs);
     fade2.fadeIn(transitionMs);
-    autoplayAt = millis() + 60 * 1000;
+    autoplayAt = millis() + 2 * 60 * 1000;
   }
 
-//  if (currentState == CHILDING && !pressed) {
-  if (currentState == CHILDING && autoplayAt < millis()) {
+  if (currentState == CHILDING && !pressed) {
+//  if (currentState == CHILDING && autoplayAt < millis()) {
     currentState = TO_BEAST;
     Serial.println("TO_BEAST");
     arduino.println("TO_BEAST");
@@ -125,7 +125,7 @@ void loop() {
     nextStateAt = currentTime + transitionMs;
     fade1.fadeIn(transitionMs);
     fade2.fadeOut(transitionMs);
-    autoplayAt = millis() + 60 * 1000;
+    autoplayAt = millis() + 2 * 60 * 1000;
   }
 
   //= Handle queued state changes
@@ -153,4 +153,6 @@ void loop() {
     playSdWav2.play("fearbeast-childing.wav");
     delay(10); // wait for library to parse WAV info
   }
+
+  delay(20);
 }
