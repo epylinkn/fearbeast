@@ -5,8 +5,8 @@
 #define BRIGHTNESS 255 // Set BRIGHTNESS to about 1/5 (max = 255)
 
 // Declare our NeoPixel strip object:
-Adafruit_NeoPixel outerStrip(6, 15, NEO_GRBW + NEO_KHZ800);
-Adafruit_NeoPixel innerStrip(11, 150, NEO_GRBW + NEO_KHZ800);
+Adafruit_NeoPixel outerStrip(15, 6, NEO_GRBW + NEO_KHZ800);
+Adafruit_NeoPixel innerStrip(150, 11, NEO_GRBW + NEO_KHZ800);
 // Argument 1 = Number of pixels in NeoPixel strip
 // Argument 2 = Arduino pin number (most are valid)
 // Argument 3 = Pixel type flags, add together as needed:
@@ -29,9 +29,16 @@ unsigned long fadeOutAt = 0;
 long pulseCounter = 0;
 int led = 13;
 
+int saucePins[4] = { 2, 3, 4, 5 };
+int sauce[4] = { 0, 0, 0, 0 };
+
 void setup() {
   Serial.begin(9600);
-  pinMode(led, OUTPUT);  
+  pinMode(led, OUTPUT);
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(4, INPUT);
+  pinMode(5, INPUT);
 
   outerStrip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   outerStrip.show();            // Turn OFF all pixels ASAP
@@ -40,42 +47,43 @@ void setup() {
   innerStrip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   innerStrip.show();            // Turn OFF all pixels ASAP
   innerStrip.setBrightness(BRIGHTNESS);
-  Serial.println("something is happening");
-}
-
-void blink() {
-  digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(300);               // wait for a second
-  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
-  delay(300);  
+  Serial.println("@leafcruncher");
 }
 
 void loop() {
   unsigned long currentTime = millis();
 
-  // Update state from Teensy
-  while (Serial.available() > 0) {
-    String inString = Serial.readStringUntil('\n');
-    Serial.println(inString);
-    
-    if (inString == "TO_CHILD") {
-      currentState = TO_CHILD;
-      fadeInAt = currentTime + 3 * 1000;
-    }
+  int value = 0;
+  for (int i = 0; i < 4; i++) {
+    sauce[i] = digitalRead(saucePins[i]);
+//    Serial.print(sauce[i]);
+//    Serial.print("\t");
+  }
+  int math = sauce[0] + sauce[1] * 2 + sauce[2] * 4 + sauce[3] * 8;
+//  Serial.println();
 
-    if (inString == "CHILDING") {
-      currentState = CHILDING;
-      pulseCounter = 0;
-    }
+  // Update state from Teensy   
+  if (math == 1) {
+    currentState = TO_CHILD;
+    Serial.println("TO_CHILD");
+    fadeInAt = currentTime + 3 * 1000;
+  }
 
-    if (inString == "TO_BEAST") {
-      currentState = TO_BEAST;
-      fadeOutAt = currentTime + 15 * 1000;
-    }
+  if (math == 2) {
+    currentState = TO_BEAST;
+    Serial.println("TO_BEAST");
+    fadeOutAt = currentTime + 3 * 1000;
+  }
 
-    if (inString == "BEASTING") {
-      currentState = BEASTING;
-    }
+  if (math == 4) {
+    currentState = CHILDING;
+    Serial.println("CHILDING");
+    pulseCounter = 0;
+  }
+
+  if (math == 8) {
+    currentState = BEASTING;
+    Serial.println("BEASTING");
   }
 
   if (currentState == BEASTING) {
@@ -93,12 +101,11 @@ void loop() {
   }
 
   if (currentState == CHILDING) {
-    bool isFadingOut = (pulseCounter / 150 % 2 == 0); // isEven
-    int distance = pulseCounter % 150;
-
+    bool isFadingOut = (pulseCounter / 255 % 2 == 0); // isEven
+    int distance = pulseCounter % 255;
 
     if (isFadingOut) {
-      int fadeOutBrightness = map(distance, 0, 150, 255, 150);
+      int fadeOutBrightness = map(distance, 0, 255, 255, 150);
       innerStrip.fill(innerStrip.Color(0, 0, 0, innerStrip.gamma8(fadeOutBrightness)));
       innerStrip.show();
       outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(fadeOutBrightness)));
@@ -106,7 +113,7 @@ void loop() {
 // Serial.print("fadeOutBrightness: ");
 // Serial.println(fadeOutBrightness);
     } else { // isFadingIn
-      int fadeInBrightness = map(distance, 0, 150, 150, 255);
+      int fadeInBrightness = map(distance, 0, 255, 150, 255);
       innerStrip.fill(innerStrip.Color(0, 0, 0, innerStrip.gamma8(fadeInBrightness)));
       innerStrip.show();
       outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(fadeInBrightness)));
@@ -119,7 +126,7 @@ void loop() {
   }
 
   if (currentState == TO_BEAST && fadeOutAt > millis()) {
-    float remaining = (fadeOutAt - millis()) / 15000. * 100;
+    float remaining = (fadeOutAt - millis()) / 3000. * 100;
     int brightness = map(remaining, 0, 100, 2, 255);
     innerStrip.fill(innerStrip.Color(0, 0, 0, innerStrip.gamma8(brightness)));
     innerStrip.show();
@@ -129,7 +136,7 @@ void loop() {
 //Serial.println(brightness);
   }
 
-  delay(5);
+  delay(10);
 }
 
 void allInnerOff() {
@@ -139,6 +146,6 @@ void allInnerOff() {
 
 void allOuterGlow() {
   outerStrip.clear();
-  outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(2)));
+  outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(25)));
   outerStrip.show();
 }

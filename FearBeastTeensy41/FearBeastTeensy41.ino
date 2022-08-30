@@ -55,19 +55,24 @@ ARTSTATES currentState = BEASTING;
 bool nextState = false;
 unsigned long nextStateAt = 0;
 
-const int matPins[8] = { A10, A11, A12, A13, A14, A15, A16, A17 };
-int matReadings[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+
+const int matPins[6] = { A10, A11, A12, A13, A14, A16 };
+int matReadings[6] = { 0, 0, 0, 0, 0, 0 };
+
 int matThreshold = 300;
 int stripPin = 37;
 unsigned long autoplayAt = 0;
 
+// try to detect and disable stuck pads...
+unsigned long lastPressedAt[6] = { 0, 0, 0, 0, 0, 0 }; 
+
 void setup() {
   Serial.begin(9600);
-  arduino.begin(9600);
 
 //  override_setup();
   
-  AudioMemory(300);
+  AudioMemory(300); 
   sgtl5000_1.enable();
   sgtl5000_1.volume(0.6);
   SPI.setMOSI(SDCARD_MOSI_PIN);
@@ -84,21 +89,35 @@ void setup() {
   
   delay(1000);
 
+  pinMode(29, OUTPUT);
+  pinMode(30, OUTPUT);
+  pinMode(31, OUTPUT);
+  pinMode(32, OUTPUT);
+
   Serial.println("BEASTING");
 }
 
 void loop() {
   override_loop();
-  arduino.println("ping");
   unsigned long currentTime = millis();
 
   //= Read Pressure Mats
   bool pressed = false;
-  for (int i = 0; i < 8; i++) {
-    int reading = analogRead(matPins[i]);
-    if (reading > matThreshold) {
-      pressed = true;
+  for (int i = 0; i < 6; i++) {
+    // skip mat if it's been high for more than an hour
+//    if (highStartAt[i] != 0 && currentTime - (60 * 60 * 1000) > highStartAt[i]) {
+//      Serial.printf("\n**** stuck sensor: %hhu****", highStartAt[i]);
+//      continue;
+//    }
+    if (lastPressedAt[i] < millis() - 1000) {
+      int reading = analogRead(matPins[i]);
+  
+      if (reading > matThreshold) {     
+        pressed = true;
+        lastPressedAt[i] = millis();
+      }
     }
+    
 //    Serial.print(reading);
 //    Serial.print("\t");
   }
@@ -108,37 +127,49 @@ void loop() {
 //  if (currentState == BEASTING && autoplayAt < millis()) {
     currentState = TO_CHILD;
     Serial.println("TO_CHILD");
-    arduino.println("TO_CHILD");
     long transitionMs = 3 * 1000;
     nextStateAt = currentTime + transitionMs;
     fade1.fadeOut(transitionMs);
     fade2.fadeIn(transitionMs);
-    autoplayAt = millis() + 2 * 60 * 1000;
+    autoplayAt = millis() + 1 * 60 * 1000;
+    digitalWrite(29, HIGH);
+    digitalWrite(30, LOW);
+    digitalWrite(31, LOW);
+    digitalWrite(32, LOW);
   }
 
   if (currentState == CHILDING && !pressed) {
 //  if (currentState == CHILDING && autoplayAt < millis()) {
     currentState = TO_BEAST;
     Serial.println("TO_BEAST");
-    arduino.println("TO_BEAST");
-    long transitionMs = 15 * 1000;
+    long transitionMs = 5 * 1000;
     nextStateAt = currentTime + transitionMs;
     fade1.fadeIn(transitionMs);
     fade2.fadeOut(transitionMs);
-    autoplayAt = millis() + 2 * 60 * 1000;
+    autoplayAt = millis() + 1  * 60 * 1000;
+    digitalWrite(29, LOW);
+    digitalWrite(30, HIGH);
+    digitalWrite(31, LOW);
+    digitalWrite(32, LOW);
   }
 
   //= Handle queued state changes
   if (currentState == TO_CHILD && currentTime > nextStateAt) {
     currentState = CHILDING;
     Serial.println("CHILDING");
-    arduino.println("CHILDING");
+    digitalWrite(29, LOW);
+    digitalWrite(30, LOW);
+    digitalWrite(31, HIGH);
+    digitalWrite(32, LOW);
   }
 
   if (currentState == TO_BEAST && currentTime > nextStateAt) {
     currentState = BEASTING;
     Serial.println("BEASTING");
-    arduino.println("BEASTING");
+    digitalWrite(29, LOW);
+    digitalWrite(30, LOW);
+    digitalWrite(31, LOW);
+    digitalWrite(32, HIGH);
   }
 
   //= Keep the audio ALWAYS looping...
@@ -154,5 +185,5 @@ void loop() {
     delay(10); // wait for library to parse WAV info
   }
 
-  delay(20);
+  delay(10);
 }
