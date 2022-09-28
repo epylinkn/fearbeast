@@ -49,30 +49,28 @@ enum ARTSTATES {
   CHILDING,
   TO_BEAST
 };
-ARTSTATES currentState = BEASTING;
+ARTSTATES currentState = CHILDING;
 
 // a boolean and timestamp to schedule future state change
 bool nextState = false;
 unsigned long nextStateAt = 0;
 
-
-
-const int matPins[6] = { A10, A11, A12, A13, A14, A16 };
-int matReadings[6] = { 0, 0, 0, 0, 0, 0 };
+const int matPins[8] = { A10, A11, A12, A13, A14, A14, A16, A14 };
+int matReadings[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 int matThreshold = 300;
 int stripPin = 37;
 unsigned long autoplayAt = 0;
 
 // try to detect and disable stuck pads...
-unsigned long lastPressedAt[6] = { 0, 0, 0, 0, 0, 0 }; 
+unsigned long lastPressedAt[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 void setup() {
   Serial.begin(9600);
 
 //  override_setup();
-  
-  AudioMemory(300); 
+
+  AudioMemory(300);
   sgtl5000_1.enable();
   sgtl5000_1.volume(0.6);
   SPI.setMOSI(SDCARD_MOSI_PIN);
@@ -83,10 +81,10 @@ void setup() {
       delay(500);
     }
   }
-  
+
   mixer1.gain(0, 0.2);
   mixer1.gain(1, 0.2);
-  
+
   delay(1000);
 
   pinMode(29, OUTPUT);
@@ -101,36 +99,40 @@ void loop() {
   override_loop();
   unsigned long currentTime = millis();
 
+  //= Keep the audio ALWAYS looping...
+  if (playSdWav1.isPlaying() == false) {
+//    Serial.println("Re-start Beasting");
+    playSdWav1.play("fearbeast-beasting.wav");
+    delay(10); // wait for library to parse WAV info
+  }
+
+  if (playSdWav2.isPlaying() == false) {
+//    Serial.println("Re-start Childing");
+    playSdWav2.play("fearbeast-childing.wav");
+    delay(10); // wait for library to parse WAV info
+  }
+
   //= Read Pressure Mats
   bool pressed = false;
-  for (int i = 0; i < 6; i++) {
-    // skip mat if it's been high for more than an hour
-//    if (highStartAt[i] != 0 && currentTime - (60 * 60 * 1000) > highStartAt[i]) {
-//      Serial.printf("\n**** stuck sensor: %hhu****", highStartAt[i]);
-//      continue;
-//    }
-    if (lastPressedAt[i] < millis() - 1000) {
-      int reading = analogRead(matPins[i]);
-  
-      if (reading > matThreshold) {     
-        pressed = true;
-        lastPressedAt[i] = millis();
-      }
+  for (int i = 0; i < 8; i++) {
+    int reading = analogRead(matPins[i]);
+
+    if (reading > matThreshold) {
+      pressed = true;
     }
-    
-//    Serial.print(reading);
-//    Serial.print("\t");
+//      Serial.print(reading);
+//      Serial.print("\t");
   }
 //  Serial.println();
-    
+
   if (currentState == BEASTING && pressed) {
 //  if (currentState == BEASTING && autoplayAt < millis()) {
     currentState = TO_CHILD;
     Serial.println("TO_CHILD");
-    long transitionMs = 3 * 1000;
+    long transitionMs = 5 * 1000;
     nextStateAt = currentTime + transitionMs;
-    fade1.fadeOut(transitionMs);
-    fade2.fadeIn(transitionMs);
+    fade1.fadeOut(300);
+    fade2.fadeIn(300);
     autoplayAt = millis() + 1 * 60 * 1000;
     digitalWrite(29, HIGH);
     digitalWrite(30, LOW);
@@ -144,8 +146,8 @@ void loop() {
     Serial.println("TO_BEAST");
     long transitionMs = 5 * 1000;
     nextStateAt = currentTime + transitionMs;
-    fade1.fadeIn(transitionMs);
-    fade2.fadeOut(transitionMs);
+    fade1.fadeIn(300);
+    fade2.fadeOut(300);
     autoplayAt = millis() + 1  * 60 * 1000;
     digitalWrite(29, LOW);
     digitalWrite(30, HIGH);
@@ -172,18 +174,6 @@ void loop() {
     digitalWrite(32, HIGH);
   }
 
-  //= Keep the audio ALWAYS looping...
-  if (playSdWav1.isPlaying() == false) {
-//    Serial.println("Re-start Beasting");
-    playSdWav1.play("fearbeast-beasting.wav");
-    delay(10); // wait for library to parse WAV info
-  }
-  
-  if (playSdWav2.isPlaying() == false) {
-//    Serial.println("Re-start Childing");
-    playSdWav2.play("fearbeast-childing.wav");
-    delay(10); // wait for library to parse WAV info
-  }
 
-  delay(10);
+  delay(30);
 }
