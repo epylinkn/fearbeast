@@ -24,6 +24,7 @@ enum ARTSTATES {
 };
 ARTSTATES currentState = BEASTING;
 
+
 unsigned long fadeInAt = 0;
 unsigned long fadeOutAt = 0;
 long pulseCounter = 0;
@@ -31,6 +32,8 @@ int led = 13;
 
 int saucePins[4] = { 2, 3, 4, 5 };
 int sauce[4] = { 0, 0, 0, 0 };
+
+
 
 void setup() {
   Serial.begin(9600);
@@ -66,13 +69,13 @@ void loop() {
   if (math == 1) {
     currentState = TO_CHILD;
     Serial.println("TO_CHILD");
-    fadeInAt = currentTime + 3 * 1000;
+    fadeInAt = currentTime + 5 * 1000;
   }
 
   if (math == 2) {
     currentState = TO_BEAST;
     Serial.println("TO_BEAST");
-    fadeOutAt = currentTime + 3 * 1000;
+    fadeOutAt = currentTime + 5 * 1000;
   }
 
   if (math == 4) {
@@ -92,8 +95,9 @@ void loop() {
   }
 
   if (currentState == TO_CHILD && fadeInAt >= currentTime) {
-    float remaining = (fadeInAt - currentTime) / (3000.) * 100;
-    int brightness = map(remaining, 0, 100, 150, 255);
+    float remaining = (fadeInAt - currentTime) / (5000.) * 100;
+    int brightness = map(remaining, 0, 100, 0, 255);
+    Serial.println(remaining);
     innerStrip.fill(innerStrip.Color(0, 0, 0, innerStrip.gamma8(brightness)));
     innerStrip.show();
     outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(brightness)));
@@ -126,11 +130,12 @@ void loop() {
   }
 
   if (currentState == TO_BEAST && fadeOutAt > millis()) {
-    float remaining = (fadeOutAt - millis()) / 3000. * 100;
-    int brightness = map(remaining, 0, 100, 2, 255);
-    innerStrip.fill(innerStrip.Color(0, 0, 0, innerStrip.gamma8(brightness)));
+    float remaining = (fadeOutAt - millis()) / 5000. * 100;
+    int brightness1 = map(remaining, 0, 100, 2, 255);
+    int brightness2 = map(remaining, 0, 100, 25, 255);
+    innerStrip.fill(innerStrip.Color(0, 0, 0, innerStrip.gamma8(brightness1)));
     innerStrip.show();
-    outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(brightness)));
+    outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(brightness2)));
     outerStrip.show();
 //Serial.print("brightness: ");
 //Serial.println(brightness);
@@ -145,7 +150,7 @@ void allInnerOff() {
 }
 
 void allOuterGlow() {
-  outerStrip.clear();
+//  outerStrip.clear();
   outerStrip.fill(outerStrip.Color(0, 0, 0, outerStrip.gamma8(25)));
   outerStrip.show();
 }
